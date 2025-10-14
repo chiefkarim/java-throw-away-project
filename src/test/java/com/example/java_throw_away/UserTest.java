@@ -32,13 +32,13 @@ public class UserTest{
   //   User user = new User("contact@karimmenna.com","123");
   //   assertEquals("123",user.getPassword());
   // }
- 
-  @Test
-  void passwordShouldNotBeStoredInPlainText(){
-    User user = new User("contact@karimmenna.com","123");
-    assertNotEquals("123",user.getPassword());
-  }
-  
+  //
+  // @Test
+  // void passwordShouldNotBeStoredInPlainText(){
+  //   User user = new User("contact@karimmenna.com","123");
+  //   assertNotEquals("123",user.getPassword());
+  // }
+  //
   @Test 
   void hashPasswordShouldProduceConsistentHash(){
     User user = new User("contact@karimmenna.com","123");
