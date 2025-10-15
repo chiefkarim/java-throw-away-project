@@ -2,15 +2,19 @@ package com.example.java_throw_away.nameInverter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class NameInverterTest {
+  private NameInverter nameInverter;
+
+  @BeforeEach
+  public void setup() {
+    nameInverter = new NameInverter();
+  }
+
   private void assertInvertedNameEquals(String name, String invertedName) {
-    assertEquals(invertedName, invertName(name));
+    assertEquals(invertedName, nameInverter.invertName(name));
   }
 
   @Test
@@ -55,44 +59,9 @@ public class NameInverterTest {
     assertInvertedNameEquals("First Last BS. Phd.", "Last, First BS. Phd.");
   }
 
-  private String invertName(String name) {
-    if (isNameNullOrEmpty(name))
-      return "";
-    else {
-      List<String> names = splitNames(name);
-      if (names.size() > 1 && isHonorific(names.get(0)))
-        names.remove(0);
-      if (isPostNominal(names)) {
-        List<String> postNominals;
-        postNominals = names.subList(2, names.size());
-        String postNominal = "";
-        for (String pn : postNominals)
-          postNominal += pn + " ";
-        return String.format("%s, %s %s", names.get(1), names.get(0), postNominal).trim();
-      }
-      if (names.size() == 1)
-        return names.get(0);
-      else {
-        return String.format("%s, %s", names.get(1), names.get(0));
-      }
-    }
-  }
-
-  private boolean isPostNominal(List<String> names) {
-    return names.size() > 2;
-  }
-
-  private boolean isHonorific(String word) {
-    return word.matches("Mr\\.|Mrs\\.");
-  }
-
-  private List<String> splitNames(String name) {
-    List<String> names = new ArrayList<String>(Arrays.asList(name.trim().split("\\s+")));
-    return names;
-  }
-
-  private boolean isNameNullOrEmpty(String name) {
-    return name == null || name.length() <= 0;
+  @Test
+  public void integration() throws Exception {
+    assertInvertedNameEquals("   Karim Menna  III esq.    ", "Menna, Karim III esq.");
   }
 
 }
