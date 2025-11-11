@@ -148,43 +148,54 @@ public class ArgsParserTest {
     Map<String, Integer> flagsCounter = new HashMap<>();
     for (int i = 0; i < arguments.size(); i++) {
       String currentArg = arguments.get(i);
-      if (isFlag(currentArg)) {
-        if (!schema.schema.containsKey(currentArg))
-          throw new IllegalArgumentException("Invalid flag " + currentArg + ".");
-        if (flagsCounter.containsKey(currentArg)) {
-          Integer allowedNumber = schema.schema.get(currentArg).number;
-          if (allowedNumber < flagsCounter.get(currentArg) + 1)
-            throw new IllegalArgumentException(
-                "Flag Number exceeded supported amount " + allowedNumber + " for flag " + currentArg + ".");
-          else {
-            flagsCounter.put(currentArg, flagsCounter.get(currentArg) + 1);
-          }
-        } else {
-          flagsCounter.put(currentArg, 1);
-        }
-
-      } else {
-        if (i - 1 >= 0) {
-          String prevArg = arguments.get(i - 1);
-          if (!isFlag(prevArg))
-            throw new IllegalArgumentException("Each flag should Have One Value Associated with it.");
-          Class<?> currentFlagType = schema.schema.get(prevArg).type;
-          try {
-            if (currentFlagType == Integer.class)
-              Integer.parseInt(currentArg);
-            else if (currentFlagType == Boolean.class) {
-              if (!currentArg.toLowerCase().equals("true") || currentArg.toLowerCase().equals("false"))
-                throw new IllegalArgumentException();
-            }
-          } catch (Exception e) {
-            throw new IllegalArgumentException(
-                "Flag " + prevArg + " value " + currentArg + " doesn't match flag type "
-                    + currentFlagType.getSimpleName() + ".");
-          }
-        }
+      if (isFlag(currentArg))
+        validateFlag(schema, flagsCounter, currentArg);
+      else {
+        if (i - 1 >= 0)
+          validateFlagValue(schema, arguments, i, currentArg);
       }
-
     }
+  }
+
+  private void validateFlagValue(Schema schema, List<String> arguments, int i, String currentArg) {
+    String prevArg = arguments.get(i - 1);
+    if (!isFlag(prevArg))
+      throw new IllegalArgumentException("Each flag should Have One Value Associated with it.");
+    Class<?> currentFlagType = schema.schema.get(prevArg).type;
+    try {
+      if (currentFlagType == Integer.class)
+        Integer.parseInt(currentArg);
+      else if (currentFlagType == Boolean.class) {
+        if (!isBoolean(currentArg))
+          throw new IllegalArgumentException();
+      }
+    } catch (Exception e) {
+      throw new IllegalArgumentException(
+          "Flag " + prevArg + " value " + currentArg + " doesn't match flag type "
+              + currentFlagType.getSimpleName() + ".");
+    }
+  }
+
+  private void validateFlag(Schema schema, Map<String, Integer> flagsCounter, String currentArg) {
+    if (!isFlagValid(schema, currentArg))
+      throw new IllegalArgumentException("Invalid flag " + currentArg + ".");
+    if (flagsCounter.containsKey(currentArg)) {
+      Integer allowedNumber = schema.schema.get(currentArg).number;
+      if (flagsCounter.get(currentArg) + 1 > allowedNumber)
+        throw new IllegalArgumentException(
+            "Flag Number exceeded supported amount " + allowedNumber + " for flag " + currentArg + ".");
+      else
+        flagsCounter.put(currentArg, flagsCounter.get(currentArg) + 1);
+    } else
+      flagsCounter.put(currentArg, 1);
+  }
+
+  private boolean isFlagValid(Schema schema, String currentArg) {
+    return schema.schema.containsKey(currentArg);
+  }
+
+  private boolean isBoolean(String arg) {
+    return arg.toLowerCase().equals("true") || arg.toLowerCase().equals("false");
   }
 
   private boolean isFlag(String currentArg) {
